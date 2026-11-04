@@ -3,7 +3,7 @@
 A privacy-sanitized, static browser for 22,813 funded-project records from the
 Hong Kong Research Grants Council public project search.
 
-**Website:** <https://lba191.github.io/Hong-Kong-UGC-funding-project-atlas/>
+**Website:** <https://lba191.github.io/Hong-Kong-RGC-funding-project-atlas/>
 
 ## Features
 
