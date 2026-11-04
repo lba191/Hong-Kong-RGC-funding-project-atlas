@@ -84,7 +84,11 @@ function loadProjects() {
   const fields = { year: "award_year", scheme: "funding_scheme", institution: "institution", panel: "panel", subject: "subject_area", status: "status" };
   state.filtered = state.projects.filter(item => {
     if (queryTokens.some(token => {
-      if (token.length <= 2) return !item.searchWords.includes(token);
+      if (token.length <= 2) {
+        const exactGeneralMatch = item.searchWords.includes(token);
+        const investigatorPrefixMatch = item.investigatorWords.some(word => word.startsWith(token));
+        return !exactGeneralMatch && !investigatorPrefixMatch;
+      }
       return !item.searchWords.some(word => word.startsWith(token));
     })) return false;
     return filterIds.every(id => !$(id).value || item[fields[id]] === $(id).value);
@@ -154,6 +158,7 @@ function unpackCatalog(payload) {
       item.status
     ].join(" "));
     item.searchWords = item.search.split(/\s+/).filter(Boolean);
+    item.investigatorWords = normalize(item.principal_investigator).split(/\s+/).filter(Boolean);
     return item;
   });
 }
