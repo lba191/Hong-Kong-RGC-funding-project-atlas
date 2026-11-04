@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Search and filter a privacy-sanitized snapshot of Hong Kong RGC funded projects.">
+  <title>RGC Project Atlas</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1930'/%3E%3Cpath d='M14 42V22l18-9 18 9v20L32 51z' fill='none' stroke='%235bd1c4' stroke-width='5'/%3E%3Cpath d='M22 28h20M22 36h20' stroke='%23fff' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark" aria-hidden="true">R</div>
+    <div class="brand-copy">
+      <p class="eyebrow">Research Grants Council · Public snapshot</p>
+      <h1>Project Atlas</h1>
+    </div>
+    <address class="site-owner">
+      <strong>Bian Liu</strong>
+      <span>PhD student · Department of Building Environment and Energy Engineering · <b>The Hong Kong Polytechnic University (PolyU)</b></span>
+      <a href="mailto:bi-an.liu@connect.polyu.hk">bi-an.liu@connect.polyu.hk</a>
+    </address>
+    <div class="capture-note" id="captureNote">Loading snapshot…</div>
+  </header>
+
+  <main>
+    <section class="overview" aria-label="Snapshot overview">
+      <div><strong id="statTotal">—</strong><span>projects indexed</span></div>
+      <div><strong id="statComplete">—</strong><span>full records captured</span></div>
+      <div><strong id="statYears">—</strong><span>award years</span></div>
+      <div><strong id="statInstitutions">—</strong><span>institutions</span></div>
+    </section>
+
+    <section class="workspace">
+      <aside class="filters" aria-label="Project filters">
+        <div class="filter-heading">
+          <div>
+            <p class="eyebrow">Refine</p>
+            <h2>Filters</h2>
+          </div>
+          <button class="text-button" id="clearFilters" type="button">Clear all</button>
+        </div>
+        <label class="search-field">
+          <span>Search project catalogue</span>
+          <input id="search" type="search" placeholder="Title, investigator, institution…" autocomplete="off">
+        </label>
+        <label><span>Award year</span><select id="year"><option value="">All years</option></select></label>
+        <label><span>Funding scheme</span><select id="scheme"><option value="">All schemes</option></select></label>
+        <label><span>Institution</span><select id="institution"><option value="">All institutions</option></select></label>
+        <label><span>Panel</span><select id="panel"><option value="">All panels</option></select></label>
+        <label><span>Subject area</span><select id="subject"><option value="">All subject areas</option></select></label>
+        <label><span>Status</span><select id="status"><option value="">All statuses</option></select></label>
+      </aside>
+
+      <section class="results" aria-live="polite">
+        <div class="results-toolbar">
+          <div>
+            <p class="eyebrow">Results</p>
+            <h2 id="resultCount">Loading projects…</h2>
+          </div>
+          <div class="toolbar-controls">
+            <label><span>Sort</span><select id="sort">
+              <option value="year_desc">Newest award year</option>
+              <option value="year_asc">Oldest award year</option>
+              <option value="title">Project title</option>
+              <option value="investigator">Investigator</option>
+              <option value="fund_desc">Largest approved fund</option>
+              <option value="project_number">Project number</option>
+            </select></label>
+            <label><span>Per page</span><select id="perPage">
+              <option>10</option><option selected>25</option><option>50</option><option>100</option>
+            </select></label>
+          </div>
+        </div>
+
+        <div class="active-filters" id="activeFilters"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Project</th><th>Investigator</th><th>Institution / field</th><th>Year</th><th>Fund</th><th>Status</th></tr></thead>
+            <tbody id="projectRows"><tr><td colspan="6" class="loading">Loading the snapshot…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="cards" id="projectCards"></div>
+        <nav class="pagination" aria-label="Results pages">
+          <button id="prevPage" type="button">Previous</button>
+          <span id="pageLabel">Page —</span>
+          <button id="nextPage" type="button">Next</button>
+        </nav>
+      </section>
+    </section>
+
+    <section class="data-notice" aria-label="Data notice">
+      <strong>Independent public research tool.</strong>
+      This site is not affiliated with or endorsed by the RGC or UGC. It presents a
+      snapshot captured on 8 October 2026; consult the original record for current
+      information. Investigator email addresses and telephone numbers are excluded.
+    </section>
+  </main>
+
+  <dialog id="projectDialog">
+    <div class="dialog-shell">
+      <button class="close-button" id="closeDialog" aria-label="Close project details" type="button">×</button>
+      <div id="projectDetail"></div>
+    </div>
+  </dialog>
+  <script src="./app.js"></script>
+</body>
+</html>
