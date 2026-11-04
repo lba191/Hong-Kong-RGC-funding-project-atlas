@@ -10,7 +10,12 @@ function esc(value = "") {
 }
 
 function normalize(value = "") {
-  return String(value).normalize("NFKC").toLocaleLowerCase("en-HK");
+  return String(value)
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLocaleLowerCase("en-HK")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
 }
 
 function optionMarkup(items) {
@@ -75,10 +80,13 @@ function compareItems(a, b) {
 }
 
 function loadProjects() {
-  const query = normalize($("search").value.trim());
+  const queryTokens = normalize($("search").value).split(/\s+/).filter(Boolean);
   const fields = { year: "award_year", scheme: "funding_scheme", institution: "institution", panel: "panel", subject: "subject_area", status: "status" };
   state.filtered = state.projects.filter(item => {
-    if (query && !item.search.includes(query)) return false;
+    if (queryTokens.some(token => {
+      if (token.length <= 2) return !item.searchWords.includes(token);
+      return !item.searchWords.some(word => word.startsWith(token));
+    })) return false;
     return filterIds.every(id => !$(id).value || item[fields[id]] === $(id).value);
   }).sort(compareItems);
 
@@ -145,6 +153,7 @@ function unpackCatalog(payload) {
       item.institution, item.funding_scheme, item.panel, item.subject_area, item.award_year,
       item.status
     ].join(" "));
+    item.searchWords = item.search.split(/\s+/).filter(Boolean);
     return item;
   });
 }
