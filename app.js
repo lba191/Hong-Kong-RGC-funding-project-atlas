@@ -41,7 +41,7 @@ function loadStats(meta) {
   $("statComplete").textContent = nf.format(meta.complete);
   $("statYears").textContent = nf.format(meta.years);
   $("statInstitutions").textContent = nf.format(meta.institutions);
-  $("captureNote").textContent = `Snapshot captured ${meta.captured_at} · Complete · Contact fields removed`;
+  $("captureNote").textContent = `Snapshot captured ${meta.captured_at}`;
 }
 
 function renderActiveFilters() {
