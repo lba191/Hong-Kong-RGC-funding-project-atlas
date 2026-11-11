@@ -2,6 +2,9 @@ const state = { page: 1, pages: 1, total: 0, loading: false, projects: [], filte
 const detailCache = new Map();
 const $ = (id) => document.getElementById(id);
 const filterIds = ["year", "scheme", "institution", "panel", "subject", "status"];
+const filterFields = { year: "award_year", scheme: "funding_scheme", institution: "institution", panel: "panel", subject: "subject_area", status: "status" };
+const filterOptionLabels = { year: "All years", scheme: "All schemes", institution: "All institutions", panel: "All panels", subject: "All subject areas", status: "All statuses" };
+const filterOptions = {};
 const labels = { year: "Year", scheme: "Scheme", institution: "Institution", panel: "Panel", subject: "Subject", status: "Status" };
 const nf = new Intl.NumberFormat("en-HK");
 
@@ -22,18 +25,55 @@ function optionMarkup(items) {
   return items.map(item => `<option value="${esc(item.value)}">${esc(item.value)} (${nf.format(item.count)})</option>`).join("");
 }
 
-function countsFor(field) {
+function queryTokens() {
+  return normalize($("search").value).split(/\s+/).filter(Boolean);
+}
+
+function matchesSearch(item, tokens) {
+  return !tokens.some(token => {
+    if (token.length <= 2) {
+      const exactGeneralMatch = item.searchWords.includes(token);
+      const investigatorPrefixMatch = item.investigatorWords.some(word => word.startsWith(token));
+      return !exactGeneralMatch && !investigatorPrefixMatch;
+    }
+    return !item.searchWords.some(word => word.startsWith(token));
+  });
+}
+
+function selectedFilters() {
+  return Object.fromEntries(filterIds.map(id => [id, $(id).value]));
+}
+
+function matchesSelectedFilters(item, selections, excludedId = "") {
+  return filterIds.every(id => id === excludedId || !selections[id] || item[filterFields[id]] === selections[id]);
+}
+
+function countsFor(id, tokens, selections) {
   const counts = new Map();
   state.projects.forEach(item => {
-    const value = item[field];
+    if (!matchesSearch(item, tokens) || !matchesSelectedFilters(item, selections, id)) return;
+    const value = item[filterFields[id]];
     if (value) counts.set(value, (counts.get(value) || 0) + 1);
   });
-  return [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => a.value.localeCompare(b.value, undefined, { numeric: true }));
+  return counts;
 }
 
 function loadFilters() {
-  const fields = { year: "award_year", scheme: "funding_scheme", institution: "institution", panel: "panel", subject: "subject_area", status: "status" };
-  filterIds.forEach(id => $(id).insertAdjacentHTML("beforeend", optionMarkup(countsFor(fields[id]))));
+  filterIds.forEach(id => {
+    const values = new Set(state.projects.map(item => item[filterFields[id]]).filter(Boolean));
+    filterOptions[id] = [...values].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  });
+}
+
+function updateFilterCounts(tokens, selections) {
+  filterIds.forEach(id => {
+    const select = $(id);
+    const selectedValue = select.value;
+    const counts = countsFor(id, tokens, selections);
+    const options = filterOptions[id].map(value => ({ value, count: counts.get(value) || 0 }));
+    select.innerHTML = `<option value="">${esc(filterOptionLabels[id])}</option>${optionMarkup(options)}`;
+    select.value = selectedValue;
+  });
 }
 
 function loadStats(meta) {
@@ -80,19 +120,12 @@ function compareItems(a, b) {
 }
 
 function loadProjects() {
-  const queryTokens = normalize($("search").value).split(/\s+/).filter(Boolean);
-  const fields = { year: "award_year", scheme: "funding_scheme", institution: "institution", panel: "panel", subject: "subject_area", status: "status" };
+  const tokens = queryTokens();
+  const selections = selectedFilters();
   state.filtered = state.projects.filter(item => {
-    if (queryTokens.some(token => {
-      if (token.length <= 2) {
-        const exactGeneralMatch = item.searchWords.includes(token);
-        const investigatorPrefixMatch = item.investigatorWords.some(word => word.startsWith(token));
-        return !exactGeneralMatch && !investigatorPrefixMatch;
-      }
-      return !item.searchWords.some(word => word.startsWith(token));
-    })) return false;
-    return filterIds.every(id => !$(id).value || item[fields[id]] === $(id).value);
+    return matchesSearch(item, tokens) && matchesSelectedFilters(item, selections);
   }).sort(compareItems);
+  updateFilterCounts(tokens, selections);
 
   const perPage = Number($("perPage").value);
   state.total = state.filtered.length;
