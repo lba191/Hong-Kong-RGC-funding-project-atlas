@@ -1,0 +1,23 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Editor and assistant workspace files
+.vscode/
+.idea/
+.codex/
+.agents/
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local previews and temporary artifacts
+*.log
+*.tmp
+*.bak
+__pycache__/
+node_modules/
